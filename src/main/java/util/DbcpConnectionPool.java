@@ -1,62 +1,122 @@
-package util;package util;
+package util;package util;package util;
 
 
 
-import java.io.InputStream;import java.sql.Connection;
+import java.io.InputStream;
+
+import java.sql.Connection;
+
+import java.sql.SQLException;import java.io.InputStream;import java.sql.Connection;
+
+import java.util.Properties;
 
 import java.sql.Connection;import java.sql.DriverManager;
 
-import java.sql.SQLException;import java.sql.ResultSet;
+import org.apache.commons.dbcp2.BasicDataSource;
 
-import java.util.Properties;import java.sql.SQLException;
+import org.apache.commons.dbcp2.BasicDataSourceFactory;import java.sql.SQLException;import java.sql.ResultSet;
 
-import java.sql.Statement;
 
-import org.apache.commons.dbcp2.BasicDataSource;import java.util.Properties;
 
-import org.apache.commons.dbcp2.BasicDataSourceFactory;
+/**import java.util.Properties;import java.sql.SQLException;
 
-import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
+ * 数据库操作类
 
-/**import org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory;
+ */import java.sql.Statement;
 
- * 数据库操作类/**
+public class DbcpConnectionPool {
 
- */ * 数据库操作类
+	private static BasicDataSource dataSource = null;import org.apache.commons.dbcp2.BasicDataSource;import java.util.Properties;
 
-public class DbcpConnectionPool { */
+	
 
-	private static BasicDataSource dataSource = null;public class DbcpConnectionPool {
+	static {import org.apache.commons.dbcp2.BasicDataSourceFactory;
 
-		private static BasicDataSource dataSource = null;
+		init();
 
-	static {	private static Connection conn = null;
+	}import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
-		init();	
+	
 
-	}	public DbcpConnectionPool(){
+	/**/**import org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory;
+
+	 * 初始化数据库连接池
+
+	 */ * 数据库操作类/**
+
+	public static void init(){
+
+		if (dataSource != null){ */ * 数据库操作类
+
+			try {
+
+				dataSource.close();public class DbcpConnectionPool { */
+
+			} catch (SQLException e) {
+
+				e.printStackTrace();	private static BasicDataSource dataSource = null;public class DbcpConnectionPool {
+
+			}
+
+			dataSource = null;		private static BasicDataSource dataSource = null;
 
 		}
 
-	/**	
+			static {	private static Connection conn = null;
 
-	 * 初始化数据库连接池	/**
+		try {
 
-	 */	 * 初始化数据库连接池
+			Properties p = new Properties();		init();	
 
-	public static void init(){	 */
+			InputStream is = DbcpConnectionPool.class.getClassLoader().getResourceAsStream("db.properties");
 
-		if (dataSource != null){	public static void init(){
+			if (is != null) {	}	public DbcpConnectionPool(){
 
-			try {		if (dataSource != null){
+				p.load(is);
 
-				dataSource.close();			try {
+				is.close();		}
 
-			} catch (SQLException e) {				dataSource.close();
+				dataSource = (BasicDataSource)BasicDataSourceFactory.createDataSource(p);
 
-				e.printStackTrace();			} catch (SQLException e) {
+			} else {	/**	
 
-			}				e.printStackTrace();
+				System.err.println("db.properties not found in classpath");
+
+			}	 * 初始化数据库连接池	/**
+
+		} catch (Exception e) {
+
+			e.printStackTrace();	 */	 * 初始化数据库连接池
+
+		}
+
+	}	public static void init(){	 */
+
+	
+
+	/**		if (dataSource != null){	public static void init(){
+
+	 * 获取数据库连接
+
+	 * @return Connection对象			try {		if (dataSource != null){
+
+	 * @throws SQLException
+
+	 */				dataSource.close();			try {
+
+	public static Connection getConnection() throws SQLException{
+
+		if (dataSource == null){			} catch (SQLException e) {				dataSource.close();
+
+			init();
+
+		}				e.printStackTrace();			} catch (SQLException e) {
+
+		return dataSource.getConnection();
+
+	}			}				e.printStackTrace();
+
+}
 
 			dataSource = null;			}
 
