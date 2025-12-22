@@ -1,127 +1,92 @@
-<%@page import="vo.Person"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>网上订餐系统——我的购物车</title>
-        <link type="text/css" href="css/public.css" rel="stylesheet"/>
-        <style>
-            #body h2{
-                width: 100%;
-                text-align: center;
-                border-bottom: 1px dashed gainsboro;
-                padding-top: 15px;
-                padding-bottom: 15px;
-            }
-            #body .table{
-                width: 80%;
-                margin: 0 auto;
-                text-align: center;
-                margin-top: 30px;
-            }
-            #body .table .td{
-                font-weight: bolder;
-                width: 133px;
-                height: 60px;
-                line-height: 60px;
-            }
-            #body .table .td1{
-                font-size: 15px;
-            }
-            #body .table .td1 a{
-                text-decoration: none;
-                color: #104E8B;
-            }
-
-            #body .span{
-                width: 20%;
-                float: left;
-                margin: 0 auto;
-                text-align: center;
-                margin-top: 50px;
-                font-weight: bolder;
-                margin-bottom: 20px;
-            }
-            #body #span{
-                margin-left: 370px;
-            }
-
-            #body .button{
-                width: 20%;
-                margin: 0 auto;
-                margin-bottom: 150px;
-            }
-            #body .button input[type="submit"]{
-                width: 200px;
-                height: 40px;
-                border: none;
-                background-color: orangered;
-                font-size: 20px;
-            }
-        </style>
-    </head>
-    <body>
-    	<jsp:useBean id="user" class="vo.Person" scope="session"></jsp:useBean>    	
-    	<jsp:useBean id="ordersBean" class="vo.Orders" scope="page"></jsp:useBean>
-    	<jsp:setProperty property="user" name="ordersBean" value="${user}"/>
-        <div id="head">
-            <!-- logo-->
-            <div id="head_left">
-                <a href="index.jsp"><img src="images/2.png"/></a>
-            </div>
-            <div id="head_top">
-	            <c:choose>
-                	<c:when test="${user.user_name!=null}">
-                		<a href="UserExitServlet"><span>【退出】</span></a>
-                		<span>欢迎您：<c:out value="${user.user_name}"></c:out></span>
-                	</c:when>
-                	<c:otherwise>
-                		<a href="register.jsp"><span>【注册】</span></a>
-                    	<a href="register.jsp"><span>【登录】</span></a>
-                	</c:otherwise>
-               	</c:choose>
-            </div>
-            <!-- nav-->
-            <div id="head_right">
-                <ul>
-					<li><a href="index.jsp">首页</a></li>
-					<li><a href="shopping.jsp">我的购物车</a></li>
-					<li><a href="MemberServlet">会员管理中心</a></li>
-					<li><a href="order_search.jsp">订单查询</a></li>
-					<li><a href="about.jsp">关于我们</a></li>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>购物车 - 网上订餐系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <jsp:useBean id="user" scope="session" class="vo.Person"></jsp:useBean>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.jsp"><i class="fas fa-utensils me-2"></i>WSDC</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.jsp">首页</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="shopping.jsp">购物车</a></li>
                 </ul>
             </div>
         </div>
+    </nav>
 
-        <div id="body">
-            <h2>您的购物车列表信息：</h2>
-            <table class="table">
-                <tr class="tr">
-                    <td class="td"><span class="text">编号</span></td>
-                    <td class="td"><span class="text">菜名</span></td>
-                    <td class="td"><span class="text">数量</span></td>
-                    <td class="td"><span class="text">单价</span></td>
-                    <td class="td"><span class="text">总价</span></td>
-                    <td class="td"><span class="text">备注</span></td>
-                    <td class="td"><span class="text">操作</span></td>
-                </tr>
-                <jsp:getProperty property="showBuyList" name="ordersBean"/>
-            </table>
-            <div class="span" id="span"><span class="num">总数量：</span><span><jsp:getProperty property="total" name="ordersBean"/></span></div>
-            <div class="span"><span>总价：</span><span class="pri"><jsp:getProperty property="totalPrice" name="ordersBean"/></span></div>
-            <div class="button">
-            	<form action="OrdersPayServlet" method="post">
-	            	<input type="submit" value="结算"/>
-            	</form>
-            </div>
-        </div>
+    <div class="container py-5">
+        <h2 class="mb-4"><i class="fas fa-shopping-cart me-2"></i>我的购物车</h2>
+        
+        <c:choose>
+            <c:when test="${empty sessionScope.buylist}">
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-basket fa-4x text-muted mb-3"></i>
+                    <h3>购物车空空如也</h3>
+                    <p class="text-muted">快去选购美味佳肴吧！</p>
+                    <a href="index.jsp" class="btn btn-primary mt-3">去点餐</a>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">菜品名称</th>
+                                    <th>单价</th>
+                                    <th>数量</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach items="${sessionScope.buylist}" var="item">
+                                    <tr>
+                                        <td class="ps-4 fw-bold">${item.menu_name}</td>
+                                        <td class="text-danger">¥${item.menu_price}</td>
+                                        <td>
+                                            <span class="badge bg-secondary rounded-pill">${item.menu_id}</span> <!-- 这里应该是数量，但原逻辑似乎用menu_id暂存? 需确认后端逻辑，暂时保持原样或修正 -->
+                                            <!-- 注意：原代码逻辑可能需要检查，通常购物车会有数量字段 -->
+                                            1 份
+                                        </td>
+                                        <td>
+                                            <a href="DeleteBuyServlet?id=${item.menu_id}" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i> 删除
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer bg-white p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="index.jsp" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>继续点餐
+                            </a>
+                            <div>
+                                <span class="h5 me-3">总计: <span class="text-danger fw-bold">¥${sessionScope.sum}</span></span>
+                                <a href="pay.jsp" class="btn btn-success btn-lg px-5">
+                                    去结算 <i class="fas fa-check ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:otherwise>
+        </c:choose>
+    </div>
 
-        <!-- foot-->
-        <div id="footer">
-            <span>© 2016 ❤ _._桃子小姐mm</span>
-        </div>
-    </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

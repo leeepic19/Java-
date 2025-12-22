@@ -1,107 +1,133 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>用户登录</title>
-        <link rel="stylesheet" type="text/css" href="css/public.css">
-        <link rel="stylesheet" type="text/css" href="css/register.css">
-    </head>
-    <body>
-    	<c:if test="${user.user_name!=null}">
-    		<% response.sendRedirect("index.jsp"); %>
-    	</c:if>
-        <div class="index_main">
-            <div id="head">
-                <!-- logo-->
-                <div id="head_left">
-                    <a href="index.jsp"><img src="images/2.png"/></a>
-                </div>
-                <div id="head_top">
-                    <a href="register.jsp"><span>【注册】</span></a>
-                    <a href="register.jsp"><span>【登录】</span></a>
-                </div> 
-                <!-- nav-->
-                <div id="head_right">
-                    <ul>
-                        <li><a href="index.jsp">首页</a></li>
-	                   <li><a href="shopping.jsp">我的购物车</a></li>
-	                   <li><a href="MemberServlet">会员管理中心</a></li>
-	                   <li><a href="order_search.jsp">订单查询</a></li>
-	                   <li><a href="about.jsp">关于我们</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="indx_main_body">
-                <div class="index_header">
-                    <div class="index_tab_nav">
-                        <div class="name">
-                            <a href="#" id="signup">注册</a>
-                            <a href="#" id="signin">登录</a>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>用户注册/登录 - 网上订餐系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .auth-header {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .nav-pills .nav-link {
+            color: #6c757d;
+            border-radius: 30px;
+            padding: 10px 25px;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card auth-card">
+                    <div class="auth-header">
+                        <h3><i class="fas fa-utensils me-2"></i>WSDC 订餐系统</h3>
+                        <p class="mb-0">欢迎回来，请登录或注册新账号</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="nav nav-pills nav-fill mb-4" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="pills-login-tab" data-bs-toggle="pill" data-bs-target="#pills-login" type="button">登录</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pills-register-tab" data-bs-toggle="pill" data-bs-target="#pills-register" type="button">注册</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="pills-tabContent">
+                            <!-- Login Form -->
+                            <div class="tab-pane fade show active" id="pills-login">
+                                <form action="UserLoginServlet" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label">用户名</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" name="username" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">密码</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                            <input type="password" name="password" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">身份</label>
+                                        <select name="flag" class="form-select">
+                                            <option value="2">普通用户</option>
+                                            <option value="1">管理员</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 py-2">立即登录</button>
+                                </form>
+                            </div>
+                            
+                            <!-- Register Form -->
+                            <div class="tab-pane fade" id="pills-register">
+                                <form action="UserRegisterServlet" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label">用户名</label>
+                                        <input type="text" name="username" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">密码</label>
+                                        <input type="password" name="password" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">确认密码</label>
+                                        <input type="password" name="repassword" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">真实姓名</label>
+                                        <input type="text" name="realname" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">性别</label>
+                                        <select name="sex" class="form-select">
+                                            <option value="男">男</option>
+                                            <option value="女">女</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">邮箱</label>
+                                        <input type="email" name="email" class="form-control" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100 py-2">注册账号</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                    <div class="signup">
-                        <form class="form" name="signupForm" action="UserRegisterServlet" method="post" onsubmit="return validateSignUp()">
-                            <div><span class="name">用户名：</span><input type="text" name="username" placeholder="姓名" maxlength="30" id="username"/></div>
-                            <div><span class="name">密码：</span><input type="password" name="password" placeholder="请输入不少于6为字符" maxlength="30" id="password"/></div>
-                            <div><span class="name">确认密码：</span><input type="password" name="password2" placeholder="确认密码" id="password2"/></div>
-                            <div><span class="name">性别：</span><input type="radio" name="sex" value="男" checked="checked"/><span>男</span><input type="radio" name="sex" value="女"/><span>女</span></div>
-                            <div><span class="name">真实姓名：</span><input type="text" name="realname" placeholder="真实姓名" id="realname"/></div>
-                            <div><span class="name">E-mail：</span><input type="text" name="email" placeholder="请输入正确的电子邮件" id="email"/></div>
-                            <div><span class="name"></span><input type="submit" value="立即注册" name="提交"/></div>
-                        </form>
-                    </div>
-                    <div class="signin" style="display: none;">
-                        <form class="form" name="signinForm" action="UserLoginServlet" method="post" onsubmit="return validateSignIn()">
-                            <div><span class="name">用户名：</span><input type="text" name="username" placeholder="请输入用户ID或者用户名" id="username2"/></div>
-                            <div><span class="name">密码：</span><input type="password" name="password" placeholder="请输入密码" id="password3"/></div>
-                            <div><span class="name1"></span><input type="submit" value="登录"/>
-                                <input type="reset" value="重置"/>
-                                <a href="find_psw.jsp"><span class="name1">忘记密码?</span></a></div>
-                        </form>
-                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="index.jsp" class="text-decoration-none text-muted"><i class="fas fa-arrow-left me-1"></i>返回首页</a>
                 </div>
             </div>
-            <div id="footer">
-                <span>© 2016 ❤ _._桃子小姐mm</span>
-            </div>
         </div>
-        <script src="js/jquery-3.1.1.min.js"></script>
-        <script type="text/javascript">
-        	$('#signup').click(function(){
-        		$('.signup').css('display', 'block');
-        		$('.signin').css('display', 'none');
-        	});
-        	$('#signin').click(function(){
-        		$('.signin').css('display', 'block');
-        		$('.signup').css('display', 'none');
-        	});
-        	
-        	function validateSignUp(){
-        		var password = document.getElementById('password').value;
-        		var password2 = document.getElementById('password2').value;
-        		if (password != password2){
-        			alert('两次密码输入不一致！');
-        			return false;
-        		} else {
-        			return true;
-        		}
-        	}
-        	function validateSignIn(){
-        		var username = document.getElementById('username2').value;
-        		var password = document.getElementById('password3').value;
-        		if (username == ""){
-        			alert('用户名不能为空！');
-        			return false;
-        		}
-        		if (password == ""){
-        			alert('密码不能为空！');
-        			return false;
-        		}
-        	}
-        </script>
-    </body>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

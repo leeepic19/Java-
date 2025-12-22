@@ -1,0 +1,11 @@
+{
+    "mssql.connections": [
+        {
+            "server": "localhost",
+            "database": "wsdc",
+            "authenticationType": "Integrated",
+            "profileName": "WSDC Local",
+            "password": ""
+        }
+    ]
+}
