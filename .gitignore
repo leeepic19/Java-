@@ -53,3 +53,13 @@ target/
 
 # Logs
 *.log
+
+# Environment directories (auto-downloaded)
+env/
+
+# IDE
+.idea/
+*.iml
+*.swp
+*.swo
+*~
