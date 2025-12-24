@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: wsdc-backend
+  
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1433;databaseName=wsdc;encrypt=true;trustServerCertificate=true
+    username: wsdcuser
+    password: Wsdc@2024 
+    
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        
+jwt:
+  secret: wsdc-secret-key-for-jwt-token-generation-2024
+  expiration: 86400000
+
+springfox:
+  documentation:
+    enabled: true
