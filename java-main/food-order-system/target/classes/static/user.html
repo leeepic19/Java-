@@ -124,15 +124,87 @@
             background: #64748b;
         }
 
-        /* 餐品列表 */
-        /* 餐品列表容器 */
-        .food-list {
+        /* 轮播容器 */
+        .merchant-carousel {
+            position: relative;
             margin-top: 30px;
+            padding: 0 60px; /* 为左右按钮留出空间 */
+        }
+
+        .merchant-container {
+            overflow: hidden;
+            min-height: 400px; /* 防止高度塌陷 */
+        }
+
+        .merchant-slide {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .merchant-slide.active {
+            display: block;
+        }
+
+        /* 轮播导航按钮 */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            color: #3b82f6;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .nav-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            color: #cbd5e1;
+        }
+
+        .prev-btn { left: 0; }
+        .next-btn { right: 0; }
+
+        /* 轮播指示器 */
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .indicator.active {
+            background: #3b82f6;
+            transform: scale(1.2);
         }
 
         /* 商家区块样式 */
         .merchant-section {
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .merchant-title {
@@ -145,12 +217,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .merchant-divider {
-            height: 1px;
-            background: linear-gradient(to right, transparent, #cbd5e1, transparent);
-            margin: 40px 0;
         }
 
         /* 餐品网格 */
@@ -426,7 +492,15 @@
         </div>
     </div>
 
-    <div class="food-list" id="foodList"></div>
+    <div class="merchant-carousel" id="merchantCarousel" style="display: none;">
+        <button class="nav-btn prev-btn" id="prevMerchantBtn"><i class="fas fa-chevron-left"></i></button>
+        <div class="merchant-container" id="merchantContainer">
+            <!-- 商家幻灯片将在这里渲染 -->
+        </div>
+        <button class="nav-btn next-btn" id="nextMerchantBtn"><i class="fas fa-chevron-right"></i></button>
+        <div class="carousel-indicators" id="carouselIndicators"></div>
+    </div>
+    <div class="food-list" id="foodList" style="display: none;"></div> <!-- 保留旧容器以防万一，但默认隐藏 -->
     <div class="tip" id="orderTip"></div>
 
     <div class="user-order" id="userOrderSection">
@@ -441,14 +515,13 @@
                     <th style="width: 120px;">餐品名称</th>
                     <th style="width: 120px;">商家名称</th>
                     <th style="width: 80px;">下单数量</th>
-                    <th style="width: 100px;">订单状态</th>
                     <th style="width: 150px;">下单时间</th>
                     <th style="width: 100px;">预计送达</th>
                     <th style="width: 100px;">操作</th>
                 </tr>
             </thead>
             <tbody id="userOrderList">
-                <tr><td colspan="8">暂无订单记录</td></tr>
+                <tr><td colspan="7">暂无订单记录</td></tr>
             </tbody>
         </table>
         <div class="tip" id="orderListTip"></div>
@@ -486,12 +559,19 @@
                 currentOrderNum: null,
                 orderListVisible: false,
                 userInfo: null,
-                refreshInterval: null // 定时器引用，便于销毁
+                refreshInterval: null, // 定时器引用，便于销毁
+                currentMerchantIndex: 0, // 当前商家索引
+                merchantCount: 0 // 商家总数
             },
             // DOM节点缓存（仅查询一次）
             els: {
                 username: $("#username"),
                 foodList: $("#foodList"),
+                merchantCarousel: $("#merchantCarousel"),
+                merchantContainer: $("#merchantContainer"),
+                carouselIndicators: $("#carouselIndicators"),
+                prevMerchantBtn: $("#prevMerchantBtn"),
+                nextMerchantBtn: $("#nextMerchantBtn"),
                 orderTip: $("#orderTip"),
                 userOrderSection: $("#userOrderSection"),
                 userOrderList: $("#userOrderList"),
@@ -557,6 +637,10 @@
             App.els.logoutBtn.on("click", logout);
             App.els.refreshOrderBtn.on("click", getUserOrders);
 
+            // 商家轮播事件
+            App.els.prevMerchantBtn.on("click", () => switchMerchant(-1));
+            App.els.nextMerchantBtn.on("click", () => switchMerchant(1));
+
             // 弹窗事件
             App.els.cancelBtn.on("click", closeModal);
             App.els.submitOrderBtn.on("click", submitOrder);
@@ -605,7 +689,8 @@
                 }
 
                 if (foods.length === 0) {
-                    App.els.foodList.html('<div class="empty-tip" style="text-align:center;padding:40px;color:#64748b;">暂无餐品上架</div>');
+                    App.els.merchantCarousel.hide();
+                    App.els.foodList.show().html('<div class="empty-tip" style="text-align:center;padding:40px;color:#64748b;">暂无餐品上架</div>');
                     return;
                 }
 
@@ -619,22 +704,24 @@
                     foodsByMerchant[merchantName].push(food);
                 });
 
-                // 渲染分组列表
-                let html = "";
-                Object.keys(foodsByMerchant).forEach((merchantName, index) => {
-                    // 添加商家分割线（如果是第一个商家，不加分割线）
-                    if (index > 0) {
-                        html += '<div class="merchant-divider"></div>';
-                    }
-                    
-                    html += `
-                        <div class="merchant-section">
-                            <h2 class="merchant-title"><i class="fas fa-store"></i> ${merchantName}</h2>
-                            <div class="food-grid">
+                const merchantNames = Object.keys(foodsByMerchant);
+                App.state.merchantCount = merchantNames.length;
+                App.state.currentMerchantIndex = 0;
+
+                // 渲染轮播内容
+                let slidesHtml = "";
+                let indicatorsHtml = "";
+
+                merchantNames.forEach((merchantName, index) => {
+                    // 渲染幻灯片
+                    slidesHtml += `
+                        <div class="merchant-slide ${index === 0 ? 'active' : ''}" data-index="${index}">
+                            <div class="merchant-section">
+                                <h2 class="merchant-title"><i class="fas fa-store"></i> ${merchantName}</h2>
+                                <div class="food-grid">
                     `;
 
-                    // 渲染该商家的餐品
-                    html += foodsByMerchant[merchantName].map(food => `
+                    slidesHtml += foodsByMerchant[merchantName].map(food => `
                         <div class="food-card">
                             <img class="food-img" src="/${food.foodImg}" alt="${food.foodName}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
                             <div class="food-info">
@@ -651,17 +738,53 @@
                         </div>
                     `).join("");
 
-                    html += `
+                    slidesHtml += `
+                                </div>
                             </div>
                         </div>
                     `;
+
+                    // 渲染指示器
+                    indicatorsHtml += `<div class="indicator ${index === 0 ? 'active' : ''}" onclick="jumpToMerchant(${index})"></div>`;
                 });
 
-                App.els.foodList.html(html);
+                App.els.merchantContainer.html(slidesHtml);
+                App.els.carouselIndicators.html(indicatorsHtml);
+                App.els.merchantCarousel.show();
+                updateCarouselState();
+
             }).fail(() => {
                 showTip(App.els.orderTip, "网络异常，查询餐品失败", "error");
-
             });
+        }
+
+        // ========== 7.1 商家轮播控制 ==========
+        function switchMerchant(direction) {
+            const newIndex = App.state.currentMerchantIndex + direction;
+            if (newIndex >= 0 && newIndex < App.state.merchantCount) {
+                jumpToMerchant(newIndex);
+            }
+        }
+
+        // 将 jumpToMerchant 挂载到 window 对象，以便 HTML 中的 onclick 可以调用
+        window.jumpToMerchant = function(index) {
+            App.state.currentMerchantIndex = index;
+            
+            // 更新幻灯片显示
+            $(".merchant-slide").removeClass("active");
+            $(`.merchant-slide[data-index="${index}"]`).addClass("active");
+            
+            // 更新指示器
+            $(".indicator").removeClass("active");
+            $(`.indicator:eq(${index})`).addClass("active");
+
+            updateCarouselState();
+        }
+
+        function updateCarouselState() {
+            // 更新按钮状态
+            App.els.prevMerchantBtn.toggleClass("disabled", App.state.currentMerchantIndex === 0);
+            App.els.nextMerchantBtn.toggleClass("disabled", App.state.currentMerchantIndex === App.state.merchantCount - 1);
         }
 
         // ========== 8. 查询我的订单（优化错误处理+渲染） ==========
@@ -672,7 +795,7 @@
 
             // 显示加载提示
             showTip(App.els.orderListTip, "正在刷新订单...", "loading");
-            App.els.userOrderList.html(`<tr><td colspan="8">加载中...</td></tr>`);
+            App.els.userOrderList.html(`<tr><td colspan="7">加载中...</td></tr>`);
 
             $.get("/order/user/list", { userId: App.state.userInfo.id })
                 .done(renderOrderList)
@@ -686,7 +809,7 @@
                 let html = "";
 
                 if (orders.length === 0) {
-                    html = `<tr><td colspan="8">暂无订单记录</td></tr>`;
+                    html = `<tr><td colspan="7">暂无订单记录</td></tr>`;
                     showTip(App.els.orderListTip, "查询成功", "success");
                 } else {
                     html = orders.map(order => {
@@ -704,7 +827,6 @@
                                 <td>${order.foodName}</td>
                                 <td>${order.merchantName || "未知商家"}</td>
                                 <td>${order.orderNum}</td>
-                                <td class="${statusClass}">${statusText}</td>
                                 <td>${orderTime}</td>
                                 <td>${deliveryTime}</td>
                                 <td>${confirmBtn}</td>
@@ -717,7 +839,7 @@
                 App.els.userOrderList.html(html);
             } else {
                 showTip(App.els.orderListTip, `查询订单失败：${res.msg || "接口返回异常"}`, "error");
-                App.els.userOrderList.html(`<tr><td colspan="8">查询订单失败</td></tr>`);
+                App.els.userOrderList.html(`<tr><td colspan="7">查询订单失败</td></tr>`);
             }
         }
 
@@ -743,7 +865,7 @@
             }
 
             showTip(App.els.orderListTip, `网络异常：${xhr.statusText}`, "error");
-            App.els.userOrderList.html(`<tr><td colspan="8">网络异常，请刷新页面</td></tr>`);
+            App.els.userOrderList.html(`<tr><td colspan="7">网络异常，请刷新页面</td></tr>`);
         }
 
         // ========== 12. 确认送达（优化逻辑+校验） ==========
