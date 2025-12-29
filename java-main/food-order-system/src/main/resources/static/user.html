@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户端 - 餐品列表</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 全局样式重置+统一配置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Noto Sans SC", sans-serif;
+        }
+
+        body {
+            padding: 20px;
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+
+        /* 头部样式 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header .username {
+            color: #64748b;
+            font-size: 15px;
+            padding-right: 15px;
+            border-right: 2px solid #e2e8f0;
+            font-weight: 500;
+        }
+
+        /* 按钮样式 */
+        button {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #myOrderBtn {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+
+        #myOrderBtn:hover {
+            background: #2563eb;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
+        }
+
+        #refreshOrderBtn {
+            background: #10b981;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        #refreshOrderBtn:hover {
+            background: #059669;
+        }
+
+        #logoutBtn {
+            background: #ef4444;
+            color: white;
+        }
+
+        #logoutBtn:hover {
+            background: #dc2626;
+        }
+
+        .confirm-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .confirm-btn:hover {
+            background: #2563eb;
+        }
+
+        .cancel-btn {
+            background: #94a3b8;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #64748b;
+        }
+
+        /* 餐品列表 */
+        /* 餐品列表容器 */
+        .food-list {
+            margin-top: 30px;
+        }
+
+        /* 商家区块样式 */
+        .merchant-section {
+            margin-bottom: 40px;
+        }
+
+        .merchant-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-left: 12px;
+            border-left: 4px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .merchant-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+            margin: 40px 0;
+        }
+
+        /* 餐品网格 */
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .food-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .food-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .food-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .food-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .food-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .merchant-name {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .food-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .food-price {
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .food-stock {
+            color: #64748b;
+            font-size: 13px;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .food-action {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .food-card input {
+            width: 70px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .food-card input:focus {
+            border-color: #3b82f6;
+        }
+
+        .food-card button {
+            flex: 1;
+            background: #10b981;
+            color: white;
+            justify-content: center;
+        }
+
+        .food-card button:hover {
+            background: #059669;
+        }
+
+        /* 提示信息 */
+        .tip {
+            margin-top: 15px;
+            height: 24px;
+            line-height: 24px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .tip-success { color: #10b981; }
+        .tip-error { color: #ef4444; }
+        .tip-loading { color: #3b82f6; }
+
+        /* 弹窗样式 */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-content {
+            width: 420px;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: scaleIn 0.2s ease;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #1e293b;
+        }
+
+        .form-item {
+            margin-bottom: 20px;
+        }
+
+        .form-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .form-item input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .form-item input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .modal-btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .modal-btn-group button {
+            flex: 1;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        /* 订单区域 */
+        .user-order {
+            margin-top: 40px;
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .user-order h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+        }
+
+        .order-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .order-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .order-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* 订单状态 */
+        .status-pending { color: #f59e0b; font-weight: 500; }
+        .status-delivered { color: #3b82f6; font-weight: 500; }
+        .status-completed { color: #10b981; font-weight: 500; }
+        .status-rejected { color: #ef4444; font-weight: 500; }
+
+        /* 动画 */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .food-list { grid-template-columns: 1fr; }
+            .header { flex-direction: column; align-items: stretch; }
+            .header-right { justify-content: space-between; }
+            .modal-content { width: 90%; }
+            .order-table { display: block; overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>餐品列表</h1>
+        <!-- 调整布局：用户名 → 退出登录 → 我的订单按钮 -->
+        <div class="header-right">
+            <span class="username" id="username"></span>
+            <button id="logoutBtn">退出登录</button>
+            <button id="myOrderBtn">我的订单</button>
+        </div>
+    </div>
+
+    <div class="food-list" id="foodList"></div>
+    <div class="tip" id="orderTip"></div>
+
+    <div class="user-order" id="userOrderSection">
+        <h3>
+            我的订单
+            <button id="refreshOrderBtn">刷新订单</button>
+        </h3>
+        <table class="order-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">订单ID</th>
+                    <th style="width: 120px;">餐品名称</th>
+                    <th style="width: 120px;">商家名称</th>
+                    <th style="width: 80px;">下单数量</th>
+                    <th style="width: 100px;">订单状态</th>
+                    <th style="width: 150px;">下单时间</th>
+                    <th style="width: 100px;">预计送达</th>
+                    <th style="width: 100px;">操作</th>
+                </tr>
+            </thead>
+            <tbody id="userOrderList">
+                <tr><td colspan="8">暂无订单记录</td></tr>
+            </tbody>
+        </table>
+        <div class="tip" id="orderListTip"></div>
+    </div>
+
+    <div class="modal-mask" id="addressModal">
+        <div class="modal-content">
+            <div class="modal-title">填写收货信息</div>
+            <div class="form-item">
+                <label for="userName">收货人：</label>
+                <input type="text" id="userName" placeholder="请输入姓名">
+            </div>
+            <div class="form-item">
+                <label for="userPhone">手机号：</label>
+                <input type="tel" id="userPhone" placeholder="请输入11位手机号">
+            </div>
+            <div class="form-item">
+                <label for="userAddress">地址：</label>
+                <input type="text" id="userAddress" placeholder="请输入详细收货地址">
+            </div>
+            <div class="modal-btn-group">
+                <button class="cancel-btn" id="cancelBtn">取消</button>
+                <button id="submitOrderBtn">确认下单</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        // ========== 1. 全局变量管理（结构化+减少魔法值） ==========
+        const App = {
+            // 状态管理
+            state: {
+                currentFoodId: null,
+                currentOrderNum: null,
+                orderListVisible: false,
+                userInfo: null,
+                refreshInterval: null // 定时器引用，便于销毁
+            },
+            // DOM节点缓存（仅查询一次）
+            els: {
+                username: $("#username"),
+                foodList: $("#foodList"),
+                orderTip: $("#orderTip"),
+                userOrderSection: $("#userOrderSection"),
+                userOrderList: $("#userOrderList"),
+                orderListTip: $("#orderListTip"),
+                addressModal: $("#addressModal"),
+                userName: $("#userName"),
+                userPhone: $("#userPhone"),
+                userAddress: $("#userAddress"),
+                myOrderBtn: $("#myOrderBtn"),
+                logoutBtn: $("#logoutBtn"),
+                refreshOrderBtn: $("#refreshOrderBtn"),
+                cancelBtn: $("#cancelBtn"),
+                submitOrderBtn: $("#submitOrderBtn")
+            },
+            // 配置常量
+            config: {
+                refreshInterval: 10000, // 订单刷新间隔
+                loginRedirect: "index.html" // 登录跳转页
+            }
+        };
+
+        // ========== 2. 页面初始化（统一入口+精简逻辑） ==========
+        $(function() {
+            // 初始化用户信息
+            App.state.userInfo = initUserInfo();
+            if (!App.state.userInfo) return;
+
+            // 渲染用户信息
+            App.els.username.text(`欢迎：${App.state.userInfo.username}`);
+
+            // 绑定事件
+            bindEvents();
+
+            // 初始化餐品列表
+            getFoodList();
+
+            // 启动订单自动刷新
+            startOrderRefresh();
+        });
+
+        // ========== 3. 用户信息初始化（双重存储+校验） ==========
+        function initUserInfo() {
+            // 双重存储读取：localStorage + sessionStorage
+            let userInfo = JSON.parse(localStorage.getItem("userInfo")) || 
+                           JSON.parse(sessionStorage.getItem("userInfo"));
+            
+            // 校验用户类型
+            if (!userInfo || userInfo.userType !== 1) {
+                alert("请先以普通用户身份登录");
+                window.location.href = App.config.loginRedirect;
+                return null;
+            }
+
+            // 兜底存储（防止刷新丢失）
+            sessionStorage.setItem("userInfo", JSON.stringify(userInfo));
+            return userInfo;
+        }
+
+        // ========== 4. 事件绑定（分离逻辑+便于维护） ==========
+        function bindEvents() {
+            // 头部按钮事件
+            App.els.myOrderBtn.on("click", toggleOrderList);
+            App.els.logoutBtn.on("click", logout);
+            App.els.refreshOrderBtn.on("click", getUserOrders);
+
+            // 弹窗事件
+            App.els.cancelBtn.on("click", closeModal);
+            App.els.submitOrderBtn.on("click", submitOrder);
+
+            // 页面刷新前保留登录态
+            window.addEventListener("beforeunload", saveUserInfoToSession);
+        }
+
+        // ========== 5. 订单自动刷新（可控+防内存泄漏） ==========
+        function startOrderRefresh() {
+            // 清除原有定时器
+            if (App.state.refreshInterval) clearInterval(App.state.refreshInterval);
+            
+            // 启动新定时器
+            App.state.refreshInterval = setInterval(() => {
+                if (App.state.orderListVisible && App.state.userInfo) {
+                    getUserOrders();
+                }
+            }, App.config.refreshInterval);
+        }
+
+        // ========== 6. 切换订单列表（优化状态管理） ==========
+        function toggleOrderList() {
+            if (App.state.orderListVisible) {
+                App.els.userOrderSection.hide();
+                App.state.orderListVisible = false;
+            } else {
+                App.els.userOrderSection.show();
+                App.state.orderListVisible = true;
+                getUserOrders(); // 强制查询订单
+            }
+        }
+
+        // ========== 7. 查询餐品列表（优化渲染+性能） ==========
+        function getFoodList() {
+            $.get("/food/list", function(res) {
+                let foods = [];
+                // 兼容不同返回格式
+                if (Array.isArray(res)) {
+                    foods = res;
+                } else if (res.code === 200) {
+                    foods = res.data || [];
+                } else {
+                    showTip(App.els.orderTip, "查询餐品失败：" + res.msg, "error");
+                    return;
+                }
+
+                if (foods.length === 0) {
+                    App.els.foodList.html('<div class="empty-tip" style="text-align:center;padding:40px;color:#64748b;">暂无餐品上架</div>');
+                    return;
+                }
+
+                // 按商家分组
+                const foodsByMerchant = {};
+                foods.forEach(food => {
+                    const merchantName = food.merchantName || "未知商家";
+                    if (!foodsByMerchant[merchantName]) {
+                        foodsByMerchant[merchantName] = [];
+                    }
+                    foodsByMerchant[merchantName].push(food);
+                });
+
+                // 渲染分组列表
+                let html = "";
+                Object.keys(foodsByMerchant).forEach((merchantName, index) => {
+                    // 添加商家分割线（如果是第一个商家，不加分割线）
+                    if (index > 0) {
+                        html += '<div class="merchant-divider"></div>';
+                    }
+                    
+                    html += `
+                        <div class="merchant-section">
+                            <h2 class="merchant-title"><i class="fas fa-store"></i> ${merchantName}</h2>
+                            <div class="food-grid">
+                    `;
+
+                    // 渲染该商家的餐品
+                    html += foodsByMerchant[merchantName].map(food => `
+                        <div class="food-card">
+                            <img class="food-img" src="/${food.foodImg}" alt="${food.foodName}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                            <div class="food-info">
+                                <div class="food-name">${food.foodName}</div>
+                                <div class="food-meta">
+                                    <div class="food-price">¥${food.price}</div>
+                                    <div class="food-stock">库存：${food.stock}份</div>
+                                </div>
+                                <div class="food-action">
+                                    <input type="number" class="orderNum" value="1" min="1" max="${food.stock}">
+                                    <button onclick="showModal(${food.id}, this)"><i class="fas fa-shopping-cart"></i> 下单</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join("");
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                App.els.foodList.html(html);
+            }).fail(() => {
+                showTip(App.els.orderTip, "网络异常，查询餐品失败", "error");
+
+            });
+        }
+
+        // ========== 8. 查询我的订单（优化错误处理+渲染） ==========
+        function getUserOrders() {
+            // 重新校验用户信息
+            App.state.userInfo = initUserInfo();
+            if (!App.state.userInfo) return;
+
+            // 显示加载提示
+            showTip(App.els.orderListTip, "正在刷新订单...", "loading");
+            App.els.userOrderList.html(`<tr><td colspan="8">加载中...</td></tr>`);
+
+            $.get("/order/user/list", { userId: App.state.userInfo.id })
+                .done(renderOrderList)
+                .fail(handleOrderRequestError);
+        }
+
+        // ========== 9. 渲染订单列表（分离渲染逻辑） ==========
+        function renderOrderList(res) {
+            if (res.code === 200) {
+                const orders = res.data || [];
+                let html = "";
+
+                if (orders.length === 0) {
+                    html = `<tr><td colspan="8">暂无订单记录</td></tr>`;
+                    showTip(App.els.orderListTip, "查询成功", "success");
+                } else {
+                    html = orders.map(order => {
+                        // 订单状态处理
+                        const { statusText, statusClass } = getOrderStatusInfo(order.status);
+                        const deliveryTime = order.deliveryTime ? `${order.deliveryTime}分钟` : "-";
+                        const orderTime = new Date(order.orderTime).toLocaleString();
+                        // 确认按钮处理
+                        const confirmBtn = order.status === 1 ? 
+                            `<button class="confirm-btn" onclick="confirmArrival(${order.id})">确认送达</button>` : "-";
+
+                        return `
+                            <tr>
+                                <td>${order.id}</td>
+                                <td>${order.foodName}</td>
+                                <td>${order.merchantName || "未知商家"}</td>
+                                <td>${order.orderNum}</td>
+                                <td class="${statusClass}">${statusText}</td>
+                                <td>${orderTime}</td>
+                                <td>${deliveryTime}</td>
+                                <td>${confirmBtn}</td>
+                            </tr>
+                        `;
+                    }).join("");
+                    showTip(App.els.orderListTip, `共查询到 ${orders.length} 条订单`, "success");
+                }
+
+                App.els.userOrderList.html(html);
+            } else {
+                showTip(App.els.orderListTip, `查询订单失败：${res.msg || "接口返回异常"}`, "error");
+                App.els.userOrderList.html(`<tr><td colspan="8">查询订单失败</td></tr>`);
+            }
+        }
+
+        // ========== 10. 订单状态工具函数（统一管理） ==========
+        function getOrderStatusInfo(status) {
+            const statusMap = {
+                0: { text: "待商家处理", class: "status-pending" },
+                1: { text: "已发货", class: "status-delivered" },
+                2: { text: "已完成", class: "status-completed" },
+                3: { text: "已拒单（库存已恢复）", class: "status-rejected" },
+                default: { text: "未知状态", class: "" }
+            };
+            return statusMap[status] || statusMap.default;
+        }
+
+        // ========== 11. 订单请求错误处理（统一管理） ==========
+        function handleOrderRequestError(xhr) {
+            if (xhr.status === 401) {
+                // 未授权：登录态失效
+                alert("登录态已失效，请重新登录");
+                logout();
+                return;
+            }
+
+            showTip(App.els.orderListTip, `网络异常：${xhr.statusText}`, "error");
+            App.els.userOrderList.html(`<tr><td colspan="8">网络异常，请刷新页面</td></tr>`);
+        }
+
+        // ========== 12. 确认送达（优化逻辑+校验） ==========
+        function confirmArrival(orderId) {
+            if (!confirm("确认收到餐品？")) return;
+
+            App.state.userInfo = initUserInfo();
+            if (!App.state.userInfo) return;
+
+            $.post("/order/user/confirm-arrival", {
+                orderId: orderId,
+                userId: App.state.userInfo.id
+            }, function(res) {
+                if (res.code === 200) {
+                    alert(res.msg);
+                    getUserOrders(); // 立即刷新订单
+                } else {
+                    alert(`操作失败：${res.msg || "未知错误"}`);
+                }
+            }).fail(() => {
+                alert("网络异常，操作失败");
+            });
+        }
+
+        // ========== 13. 下单弹窗（优化校验+交互） ==========
+        function showModal(foodId, btn) {
+            const orderNum = $(btn).prev(".orderNum").val();
+            const stock = $(btn).parent().prev(".food-stock").text()
+                .replace("库存：", "").replace("份", "");
+
+            // 数量校验
+            if (parseInt(orderNum) > parseInt(stock)) {
+                showTip(App.els.orderTip, "下单数量不能超过库存", "error");
+                return;
+            }
+
+            // 保存当前订单信息
+            App.state.currentFoodId = foodId;
+            App.state.currentOrderNum = orderNum;
+
+            // 清空表单
+            App.els.userName.val("");
+            App.els.userPhone.val("");
+            App.els.userAddress.val("");
+
+            // 显示弹窗
+            App.els.addressModal.css("display", "flex");
+        }
+
+        // ========== 14. 关闭弹窗（重置状态） ==========
+        function closeModal() {
+            App.els.addressModal.css("display", "none");
+            // 重置状态
+            App.state.currentFoodId = null;
+            App.state.currentOrderNum = null;
+        }
+
+        // ========== 15. 提交订单（优化校验+逻辑） ==========
+        function submitOrder() {
+            App.state.userInfo = initUserInfo();
+            if (!App.state.userInfo) {
+                alert("登录态失效，请重新登录");
+                closeModal();
+                return;
+            }
+
+            // 获取表单值
+            const userName = App.els.userName.val().trim();
+            const userPhone = App.els.userPhone.val().trim();
+            const userAddress = App.els.userAddress.val().trim();
+
+            // 表单校验
+            if (!validateOrderForm(userName, userPhone, userAddress)) return;
+
+            // 提交订单
+            $.post("/order/create", {
+                userId: App.state.userInfo.id,
+                foodId: App.state.currentFoodId,
+                orderNum: App.state.currentOrderNum,
+                userName: userName,
+                userPhone: userPhone,
+                userAddress: userAddress
+            }, function(res) {
+                closeModal();
+                if (res.code === 200) {
+                    showTip(App.els.orderTip, res.msg, "success");
+                    // 刷新餐品列表
+                    setTimeout(getFoodList, 1000);
+                    // 若订单列表显示则刷新
+                    if (App.state.orderListVisible) {
+                        setTimeout(getUserOrders, 1500);
+                    }
+                } else {
+                    showTip(App.els.orderTip, res.msg, "error");
+                }
+            }).fail(() => {
+                closeModal();
+                showTip(App.els.orderTip, "网络异常，下单失败", "error");
+            });
+        }
+
+        // ========== 16. 订单表单校验（分离逻辑） ==========
+        function validateOrderForm(name, phone, address) {
+            if (!name) {
+                alert("请输入收货人姓名");
+                return false;
+            }
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                alert("请输入有效手机号");
+                return false;
+            }
+            if (!address) {
+                alert("请输入收货地址");
+                return false;
+            }
+            return true;
+        }
+
+        // ========== 17. 退出登录（清空存储+销毁定时器） ==========
+        function logout() {
+            // 清空存储
+            localStorage.removeItem("userInfo");
+            sessionStorage.removeItem("userInfo");
+            App.state.userInfo = null;
+
+            // 销毁定时器（防内存泄漏）
+            if (App.state.refreshInterval) {
+                clearInterval(App.state.refreshInterval);
+            }
+
+            // 跳转登录页
+            window.location.href = App.config.loginRedirect;
+        }
+
+        // ========== 18. 保存用户信息到Session（兜底） ==========
+        function saveUserInfoToSession() {
+            if (App.state.userInfo) {
+                sessionStorage.setItem("userInfo", JSON.stringify(App.state.userInfo));
+            }
+        }
+
+        // ========== 19. 提示信息工具函数（统一管理） ==========
+        function showTip($el, message, type = "success") {
+            $el.text(message)
+               .removeClass("tip-success tip-error tip-loading")
+               .addClass(`tip-${type}`);
+            
+            // 3秒后清空提示（加载提示除外）
+            if (type !== "loading") {
+                setTimeout(() => $el.text(""), 3000);
+            }
+        }
+    </script>
+</body>
+</html>

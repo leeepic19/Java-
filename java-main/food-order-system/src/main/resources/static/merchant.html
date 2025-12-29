@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家端 - 餐品管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 全局样式重置+统一配置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Noto Sans SC", sans-serif;
+        }
+
+        body {
+            padding: 20px;
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+
+        /* 头部样式 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header .username {
+            color: #64748b;
+            font-size: 15px;
+            padding-right: 15px;
+            border-right: 2px solid #e2e8f0;
+            font-weight: 500;
+        }
+
+        /* 按钮样式 */
+        button {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .order-btn {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .order-btn:hover {
+            background: #2563eb;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .upload-btn {
+            background: #10b981;
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .upload-btn:hover {
+            background: #059669;
+        }
+
+        .update-stock-btn {
+            background: #f59e0b;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .update-stock-btn:hover {
+            background: #d97706;
+        }
+
+        /* 容器布局 */
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .upload-form {
+            width: 350px;
+            min-width: 300px;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 25px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .food-manage {
+            flex: 1;
+            min-width: 600px;
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 表单样式 */
+        .upload-form h3, .food-manage h3 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 15px 10px;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #334155;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            border-top: 1px solid #f1f5f9;
+        }
+        
+        th:first-child { border-top-left-radius: 8px; border-left: 1px solid #f1f5f9; }
+        th:last-child { border-top-right-radius: 8px; border-right: 1px solid #f1f5f9; }
+        td:first-child { border-left: 1px solid #f1f5f9; }
+        td:last-child { border-right: 1px solid #f1f5f9; }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* 图片样式 */
+        .food-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 提示信息 */
+        .tip {
+            margin-top: 15px;
+            height: 20px;
+            line-height: 20px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .tip-success { color: #10b981; }
+        .tip-error { color: #ef4444; }
+
+        /* 库存输入框 */
+        .newStock {
+            width: 70px;
+            padding: 6px 8px;
+            margin-right: 8px;
+            text-align: center;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 1024px) {
+            .food-manage { min-width: 500px; }
+        }
+
+        @media (max-width: 768px) {
+            .container { gap: 20px; }
+            .upload-form, .food-manage { min-width: 100%; width: 100%; }
+            .header .username { display: none; }
+            th, td { padding: 10px 5px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>餐品管理</h1>
+        <div class="header-actions">
+            <span class="username" id="username"></span>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
+            <button class="order-btn" id="goToOrderBtn"><i class="fas fa-clipboard-list"></i> 订单管理</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="upload-form">
+            <h3><i class="fas fa-plus-circle"></i> 上传新餐品</h3>
+            <input type="text" id="merchantName" placeholder="请输入商家名称">
+            <input type="text" id="foodName" placeholder="请输入餐品名称">
+            <input type="number" id="price" placeholder="请输入餐品价格" min="0" step="0.01">
+            <input type="number" id="stock" placeholder="请输入库存数量" min="0">
+            <input type="file" id="foodImg" accept="image/*">
+            <button class="upload-btn" id="uploadFoodBtn"><i class="fas fa-cloud-upload-alt"></i> 上传餐品</button>
+            <div class="tip" id="uploadTip"></div>
+        </div>
+
+        <div class="food-manage">
+            <h3><i class="fas fa-utensils"></i> 我的餐品</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">餐品ID</th>
+                        <th style="width: 100px;">餐品图片</th>
+                        <th style="width: 150px;">餐品名称</th>
+                        <th style="width: 150px;">商家名称</th>
+                        <th style="width: 80px;">价格</th>
+                        <th style="width: 80px;">当前库存</th>
+                        <th style="width: 180px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="merchantFoodList">
+                    <tr><td colspan="7">加载中...</td></tr>
+                </tbody>
+            </table>
+            <div class="tip" id="updateTip"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        // ========== 1. 全局变量缓存（减少重复查询） ==========
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        // DOM节点缓存（仅查询一次）
+        const $els = {
+            username: $("#username"),
+            merchantName: $("#merchantName"),
+            foodName: $("#foodName"),
+            price: $("#price"),
+            stock: $("#stock"),
+            foodImg: $("#foodImg"),
+            uploadTip: $("#uploadTip"),
+            updateTip: $("#updateTip"),
+            merchantFoodList: $("#merchantFoodList"),
+            goToOrderBtn: $("#goToOrderBtn"),
+            logoutBtn: $("#logoutBtn"),
+            uploadFoodBtn: $("#uploadFoodBtn")
+        };
+
+        // ========== 2. 页面初始化（统一入口+精简逻辑） ==========
+        $(function() {
+            initPage();
+        });
+
+        /**
+         * 页面初始化：验证登录 + 渲染用户信息 + 绑定事件 + 加载数据
+         */
+        function initPage() {
+            // 登录状态验证
+            if (!userInfo || userInfo.userType !== 2) {
+                alert("请先以商家身份登录");
+                window.location.href = "index.html";
+                return;
+            }
+
+            // 渲染用户信息（单次DOM操作）
+            $els.username.text(`欢迎：${userInfo.username}`);
+            $els.merchantName.val(userInfo.username);
+
+            // 绑定事件（统一管理）
+            bindEvents();
+
+            // 加载餐品列表
+            getMerchantFoodList();
+        }
+
+        // ========== 3. 事件绑定（分离逻辑+便于维护） ==========
+        function bindEvents() {
+            $els.goToOrderBtn.on("click", goToOrderPage);
+            $els.logoutBtn.on("click", logout);
+            $els.uploadFoodBtn.on("click", uploadFood);
+        }
+
+        // ========== 4. 跳转订单管理页（极简逻辑） ==========
+        function goToOrderPage() {
+            window.location.href = "merchant-order.html";
+        }
+
+        // ========== 5. 上传餐品（优化校验+减少DOM操作） ==========
+        function uploadFood() {
+            // 一次性获取表单值（减少DOM查询）
+            const formData = {
+                merchantName: $els.merchantName.val().trim(),
+                foodName: $els.foodName.val().trim(),
+                price: $els.price.val().trim(),
+                stock: $els.stock.val().trim(),
+                foodImg: $els.foodImg[0].files[0]
+            };
+
+            // 精简校验逻辑
+            const validateResult = validateUploadForm(formData);
+            if (validateResult !== true) {
+                showTip($els.uploadTip, validateResult, "error");
+                return;
+            }
+
+            // 构建FormData（文件上传专用）
+            const fd = new FormData();
+            fd.append("merchantId", userInfo.id);
+            fd.append("merchantName", formData.merchantName);
+            fd.append("foodName", formData.foodName);
+            fd.append("price", formData.price);
+            fd.append("stock", formData.stock);
+            fd.append("foodImg", formData.foodImg);
+
+            // AJAX请求（优化配置+统一错误处理）
+            $.ajax({
+                url: "/food/upload",
+                type: "POST",
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if (res.code === 200) {
+                        showTip($els.uploadTip, res.msg, "success");
+                        // 批量清空表单（减少多次DOM操作）
+                        resetUploadForm();
+                        // 刷新餐品列表
+                        getMerchantFoodList();
+                    } else {
+                        showTip($els.uploadTip, res.msg, "error");
+                    }
+                },
+                error: function() {
+                    showTip($els.uploadTip, "图片上传失败，请重试", "error");
+                }
+            });
+        }
+
+        // ========== 6. 表单校验（分离逻辑+可复用） ==========
+        function validateUploadForm(data) {
+            if (!data.merchantName) return "请输入商家名称";
+            if (!data.foodName) return "请输入餐品名称";
+            if (!data.price || data.price < 0) return "请输入有效的餐品价格";
+            if (!data.stock || data.stock < 0) return "请输入有效的库存数量";
+            if (!data.foodImg) return "请选择餐品图片";
+            return true;
+        }
+
+        // ========== 7. 重置上传表单（批量操作+减少DOM开销） ==========
+        function resetUploadForm() {
+            $els.foodName.val("");
+            $els.price.val("");
+            $els.stock.val("");
+            $els.foodImg.val("");
+            $els.merchantName.val(userInfo.username);
+        }
+
+        // ========== 8. 获取商家餐品列表（优化渲染+性能） ==========
+        function getMerchantFoodList() {
+            // 加载中提示（单次DOM操作）
+            $els.merchantFoodList.html('<tr><td colspan="7">加载中...</td></tr>');
+            
+            $.get("/food/merchantList", { merchantId: userInfo.id })
+                .done(renderFoodList)
+                .fail(() => {
+                    $els.merchantFoodList.html('<tr><td colspan="7">查询失败，请刷新</td></tr>');
+                });
+        }
+
+        // ========== 9. 渲染餐品列表（一次性拼接+减少重排） ==========
+        function renderFoodList(res) {
+            let foods = [];
+            // 兼容不同返回格式
+            if (res.code === 200) {
+                foods = res.data || [];
+            } else if (Array.isArray(res)) {
+                foods = res;
+            }
+
+            // 一次性拼接HTML（关键：减少多次DOM操作）
+            let html = "";
+            if (foods.length === 0) {
+                html = '<tr><td colspan="7">暂无餐品</td></tr>';
+            } else {
+                html = foods.map(food => `
+                    <tr>
+                        <td>${food.id || ""}</td>
+                        <td>
+                            <img class="food-img" 
+                                 data-src="/${food.foodImg || ''}" 
+                                 alt="${food.foodName || '餐品图片'}"
+                                 onload="this.style.display='block'">
+                        </td>
+                        <td>${food.foodName || ""}</td>
+                        <td>${food.merchantName || "未知商家"}</td>
+                        <td>¥${(food.price || 0).toFixed(2)}</td>
+                        <td>${food.stock || 0}</td>
+                        <td>
+                            <input type="number" class="newStock" value="${food.stock || 0}" min="0">
+                            <button class="update-stock-btn" onclick="updateStock(${food.id}, this)">修改库存</button>
+                        </td>
+                    </tr>
+                `).join("");
+            }
+
+            // 单次DOM赋值（减少重排重绘）
+            $els.merchantFoodList.html(html);
+            
+            // 图片懒加载（优化首屏加载）
+            lazyLoadImages();
+        }
+
+        // ========== 10. 图片懒加载（提升性能） ==========
+        function lazyLoadImages() {
+            $("img[data-src]").each(function() {
+                const $img = $(this);
+                $img.attr("src", $img.attr("data-src")).removeAttr("data-src");
+            });
+        }
+
+        // ========== 11. 修改库存（精简逻辑+优化提示） ==========
+        function updateStock(foodId, btn) {
+            const newStock = $(btn).prev(".newStock").val().trim();
+            
+            // 校验库存
+            if (!newStock || newStock < 0) {
+                showTip($els.updateTip, "库存不能为负数", "error");
+                return;
+            }
+
+            // 发起请求
+            $.post("/food/updateStock", {
+                foodId: foodId,
+                stock: newStock
+            }, function(res) {
+                if (res.code === 200) {
+                    showTip($els.updateTip, res.msg, "success");
+                    getMerchantFoodList();
+                } else {
+                    showTip($els.updateTip, res.msg, "error");
+                }
+            }).fail(function() {
+                showTip($els.updateTip, "修改失败，请重试", "error");
+            });
+        }
+
+        // ========== 12. 退出登录（极简逻辑） ==========
+        function logout() {
+            localStorage.removeItem("userInfo");
+            window.location.href = "index.html";
+        }
+
+        // ========== 13. 提示信息工具函数（统一管理+减少重复代码） ==========
+        function showTip($el, message, type = "success") {
+            $el.text(message)
+               .removeClass("tip-success tip-error")
+               .addClass(type === "success" ? "tip-success" : "tip-error");
+            
+            // 3秒后清空提示（提升体验）
+            setTimeout(() => $el.text(""), 3000);
+        }
+    </script>
+</body>
+</html>

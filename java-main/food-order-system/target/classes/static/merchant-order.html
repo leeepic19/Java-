@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家端 - 订单管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 头部样式 */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #6366f1);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header .username {
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 按钮通用样式 */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-light {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-light:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover { filter: brightness(90%); }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover { filter: brightness(90%); }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        .btn-warning:hover { filter: brightness(90%); }
+
+        /* 主容器 */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            white-space: nowrap;
+        }
+
+        .order-table th {
+            background-color: #f8fafc;
+            color: var(--text-sub);
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-table td {
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .order-table tr:last-child td { border-bottom: none; }
+        .order-table tr:hover { background-color: #f8fafc; }
+
+        /* 操作按钮组 */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* 提示信息 */
+        .tip {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tip-success { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .tip-error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .tip-loading { background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-sub);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .header .user-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .container { padding: 0 1rem; margin: 1rem auto; }
+            .card { padding: 1rem; }
+            .btn span { display: none; } /* 隐藏按钮文字只显示图标 */
+            .btn { padding: 0.5rem; }
+            .header .username { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <div class="header">
+        <h1><i class="fas fa-utensils"></i> 订单管理系统</h1>
+        <div class="user-actions">
+            <span class="username" id="username"><i class="fas fa-user-circle"></i> 商家</span>
+            <button class="btn btn-light" onclick="goToFoodPage()" title="返回餐品管理">
+                <i class="fas fa-arrow-left"></i> <span>返回餐品管理</span>
+            </button>
+            <button class="btn btn-light" onclick="logout()" title="退出登录">
+                <i class="fas fa-sign-out-alt"></i> <span>退出</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 主内容容器 -->
+    <div class="container">
+        <div class="card">
+            <!-- 订单标题栏 -->
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-clipboard-list"></i> 待处理订单</div>
+                <button class="btn btn-primary" onclick="getMerchantPendingOrders()">
+                    <i class="fas fa-sync-alt"></i> <span>刷新订单</span>
+                </button>
+            </div>
+            
+            <!-- 订单表格 -->
+            <div class="table-container">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>餐品名称</th>
+                            <th>数量</th>
+                            <th>收货人</th>
+                            <th>电话</th>
+                            <th>地址</th>
+                            <th>下单时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="merchantOrderList">
+                        <!-- 动态内容 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 提示信息 -->
+            <div class="tip tip-loading" id="orderTip">
+                <i class="fas fa-spinner fa-spin"></i> 正在加载订单数据...
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        // 全局变量
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        const $merchantOrderList = $("#merchantOrderList");
+        const $orderTip = $("#orderTip");
+
+        // 页面初始化
+        $(function() {
+            initPage();
+        });
+
+        function initPage() {
+            // 登录状态验证
+            if (!userInfo || userInfo.userType !== 2) {
+                alert("请先以商家身份登录");
+                window.location.href = "index.html";
+                return;
+            }
+
+            // 渲染用户名
+            $("#username").html(`<i class="fas fa-user-circle"></i> ${userInfo.username}`);
+            
+            // 加载订单数据
+            getMerchantPendingOrders();
+        }
+
+        function getMerchantPendingOrders() {
+            setLoadingState();
+            $.get("/order/merchant/pending", { merchantId: userInfo.id })
+                .done(renderOrderList)
+                .fail(handleRequestError);
+        }
+
+        function renderOrderList(res) {
+            let html = "";
+
+            if (res.code === 200) {
+                const orders = res.data || [];
+                
+                if (orders.length === 0) {
+                    html = `
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>暂无待处理订单</p>
+                                </div>
+                            </td>
+                        </tr>`;
+                    $orderTip.removeClass().addClass("tip tip-success").html('<i class="fas fa-check-circle"></i> 查询成功，暂无待处理订单');
+                } else {
+                    html = renderOrderItems(orders);
+                    $orderTip.removeClass().addClass("tip tip-success").html(`<i class="fas fa-check-circle"></i> 共查询到 ${orders.length} 条待处理订单`);
+                }
+            } else {
+                html = `<tr><td colspan="8" class="text-center text-danger">查询失败</td></tr>`;
+                $orderTip.removeClass().addClass("tip tip-error").html(`<i class="fas fa-exclamation-circle"></i> 查询订单失败：${res.msg}`);
+            }
+
+            $merchantOrderList.html(html);
+        }
+
+        function renderOrderItems(orders) {
+            return orders.map(order => {
+                const orderTime = new Date(order.orderTime).toLocaleString();
+                return `
+                    <tr>
+                        <td>#${order.id}</td>
+                        <td><span style="font-weight:500">${order.foodName}</span></td>
+                        <td><span class="badge bg-info">${order.orderNum}</span></td>
+                        <td>${order.userName}</td>
+                        <td>${order.userPhone}</td>
+                        <td title="${order.userAddress}" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${order.userAddress}</td>
+                        <td>${orderTime}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-success btn-sm" onclick="confirmDelivery(${order.id})" title="确认发货">
+                                    <i class="fas fa-shipping-fast"></i> 发货
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectOrder(${order.id})" title="拒单">
+                                    <i class="fas fa-times-circle"></i> 拒单
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function handleRequestError() {
+            $merchantOrderList.html('<tr><td colspan="8" class="text-center">查询异常</td></tr>');
+            $orderTip.removeClass().addClass("tip tip-error").html('<i class="fas fa-exclamation-triangle"></i> 网络请求失败');
+        }
+
+        function setLoadingState() {
+            $merchantOrderList.html('<tr><td colspan="8" class="text-center"><div style="padding:2rem"><i class="fas fa-spinner fa-spin fa-2x"></i></div></td></tr>');
+            $orderTip.removeClass().addClass("tip tip-loading").html('<i class="fas fa-spinner fa-spin"></i> 正在刷新订单数据...');
+        }
+
+        function confirmDelivery(orderId) {
+            const deliveryTime = prompt("请输入预计送达时间（分钟）：", "30");
+            
+            if (!deliveryTime || isNaN(deliveryTime) || Number(deliveryTime) <= 0) {
+                alert("请输入有效的送达时间（大于0的数字）");
+                return;
+            }
+
+            $.post("/order/merchant/confirm-delivery", {
+                orderId,
+                deliveryTime: Number(deliveryTime)
+            })
+                .done(res => {
+                    alert(res.msg);
+                    if (res.code === 200) getMerchantPendingOrders();
+                })
+                .fail(() => alert("网络异常，发货失败"));
+        }
+
+        function rejectOrder(orderId) {
+            if (!confirm("确定要拒单吗？拒单后库存将恢复")) return;
+
+            $.post("/order/merchant/reject", { orderId })
+                .done(res => {
+                    alert(res.msg);
+                    if (res.code === 200) getMerchantPendingOrders();
+                })
+                .fail(() => alert("网络异常，拒单失败"));
+        }
+
+        function goToFoodPage() {
+            window.location.href = "merchant.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("userInfo");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

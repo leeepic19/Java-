@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网上订餐系统 - 登录/注册</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 全局样式重置+基础配置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Noto Sans SC", "Microsoft Yahei", sans-serif;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* 背景美化：更加现代的渐变背景 */
+        body {
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        /* 标题样式优化 */
+        h1 {
+            color: #fff;
+            font-size: 32px;
+            margin-bottom: 40px;
+            font-weight: 700;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+        }
+
+        /* 标签页容器：卡片化设计 + 玻璃拟态效果 */
+        .tab {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 标签按钮栏 */
+        .tab-btn-group {
+            display: flex;
+            background: #f1f5f9;
+            padding: 5px;
+        }
+
+        /* 标签按钮样式 */
+        .tablinks {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 15px;
+            color: #64748b;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .tablinks.active {
+            background: #fff;
+            color: #764ba2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .tablinks:hover:not(.active) {
+            color: #475569;
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* 标签内容区 */
+        .tab-content {
+            padding: 40px 30px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        /* 内容区标题 */
+        .tab-content h3 {
+            color: #1e293b;
+            font-size: 22px;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        /* 输入框容器 */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        /* 输入框样式美化 */
+        input {
+            width: 100%;
+            padding: 14px 16px 14px 45px; /* 留出图标位置 */
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        input:focus {
+            border-color: #764ba2;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
+        }
+
+        input::placeholder {
+            color: #cbd5e1;
+        }
+
+        /* 提交按钮样式 */
+        button.submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+        }
+
+        button.submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        button.submit:active {
+            transform: translateY(0);
+        }
+
+        /* 提示信息样式 */
+        .tip {
+            height: 20px;
+            line-height: 20px;
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* 动画 */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 480px) {
+            h1 { font-size: 24px; }
+            .tab { border-radius: 0; height: 100vh; max-width: none; }
+            body { padding: 0; background: #fff; }
+            .tab { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <h1>网上订餐管理系统</h1>
+
+    <!-- 登录/注册标签页：重构结构，优化按钮栏 -->
+    <div class="tab">
+        <div class="tab-btn-group">
+            <button class="tablinks active" onclick="openTab(event, 'loginTab')">用户登录</button>
+            <button class="tablinks" onclick="openTab(event, 'merchantLoginTab')">商家登录</button>
+            <button class="tablinks" onclick="openTab(event, 'registerTab')">用户注册</button>
+            <button class="tablinks" onclick="openTab(event, 'merchantRegisterTab')">商家注册</button>
+        </div>
+
+        <!-- 用户登录 -->
+        <div id="loginTab" class="tab-content active">
+            <h3>用户登录</h3>
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="loginUsername" placeholder="请输入用户名">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPassword" placeholder="请输入密码">
+            </div>
+            <button class="submit" onclick="login(1)">登录</button>
+            <div class="tip" id="loginTip"></div>
+        </div>
+
+        <!-- 商家登录 -->
+        <div id="merchantLoginTab" class="tab-content">
+            <h3>商家登录</h3>
+            <div class="input-group">
+                <i class="fas fa-store"></i>
+                <input type="text" id="merchantLoginUsername" placeholder="请输入用户名">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="merchantLoginPassword" placeholder="请输入密码">
+            </div>
+            <button class="submit" onclick="login(2)">登录</button>
+            <div class="tip" id="merchantLoginTip"></div>
+        </div>
+
+        <!-- 用户注册 -->
+        <div id="registerTab" class="tab-content">
+            <h3>用户注册</h3>
+            <div class="input-group">
+                <i class="fas fa-user-plus"></i>
+                <input type="text" id="registerUsername" placeholder="请输入用户名">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="registerPassword" placeholder="请输入密码">
+            </div>
+            <button class="submit" onclick="register(1)">注册</button>
+            <div class="tip" id="registerTip"></div>
+        </div>
+
+        <!-- 商家注册 -->
+        <div id="merchantRegisterTab" class="tab-content">
+            <h3>商家注册</h3>
+            <div class="input-group">
+                <i class="fas fa-store"></i>
+                <input type="text" id="merchantRegisterUsername" placeholder="请输入用户名">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="merchantRegisterPassword" placeholder="请输入密码">
+            </div>
+            <button class="submit" onclick="register(2)">注册</button>
+            <div class="tip" id="merchantRegisterTip"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        // ========== 全局缓存：减少重复DOM查询 ==========
+        const TabCache = {
+            // 提示框DOM缓存
+            tips: {
+                login: $("#loginTip"),
+                merchantLogin: $("#merchantLoginTip"),
+                register: $("#registerTip"),
+                merchantRegister: $("#merchantRegisterTip")
+            },
+            // 输入框DOM缓存
+            inputs: {
+                login: {
+                    username: $("#loginUsername"),
+                    password: $("#loginPassword")
+                },
+                merchantLogin: {
+                    username: $("#merchantLoginUsername"),
+                    password: $("#merchantLoginPassword")
+                },
+                register: {
+                    username: $("#registerUsername"),
+                    password: $("#registerPassword")
+                },
+                merchantRegister: {
+                    username: $("#merchantRegisterUsername"),
+                    password: $("#merchantRegisterPassword")
+                }
+            }
+        };
+
+        // ========== 标签页切换：优化流畅度 ==========
+        function openTab(evt, tabName) {
+            // 隐藏所有内容 + 取消所有按钮激活态
+            $(".tab-content").removeClass("active");
+            $(".tablinks").removeClass("active");
+            // 激活目标标签
+            $(`#${tabName}`).addClass("active");
+            $(evt.currentTarget).addClass("active");
+            // 清空所有提示框
+            Object.values(TabCache.tips).forEach(tip => tip.text("").css("color", ""));
+        }
+
+        // ========== 注册逻辑：精简+优化交互 ==========
+        function register(userType) {
+            let username, password, tipEl;
+            // 根据用户类型获取对应DOM
+            if (userType === 1) {
+                username = TabCache.inputs.register.username.val().trim();
+                password = TabCache.inputs.register.password.val().trim();
+                tipEl = TabCache.tips.register;
+            } else {
+                username = TabCache.inputs.merchantRegister.username.val().trim();
+                password = TabCache.inputs.merchantRegister.password.val().trim();
+                tipEl = TabCache.tips.merchantRegister;
+            }
+
+            // 空值校验
+            if (!username || !password) {
+                tipEl.css("color", "red").text("用户名和密码不能为空");
+                return;
+            }
+
+            // 发起注册请求
+            $.post("/register", {
+                username: username,
+                password: password,
+                userType: userType
+            }, function(res) {
+                if (res.code === 200) {
+                    // 注册成功
+                    tipEl.css("color", "green").text(res.msg);
+                    // 清空输入框（批量操作，减少DOM操作）
+                    if (userType === 1) {
+                        TabCache.inputs.register.username.val("");
+                        TabCache.inputs.register.password.val("");
+                    } else {
+                        TabCache.inputs.merchantRegister.username.val("");
+                        TabCache.inputs.merchantRegister.password.val("");
+                    }
+                    // 3秒后自动切换到对应登录标签
+                    setTimeout(() => {
+                        const targetTab = userType === 1 ? "loginTab" : "merchantLoginTab";
+                        $(".tablinks").each((i, el) => {
+                            if (el.onclick.toString().includes(targetTab)) {
+                                el.click();
+                            }
+                        });
+                    }, 2000);
+                } else {
+                    // 注册失败
+                    tipEl.css("color", "red").text(res.msg);
+                }
+            }).fail(() => {
+                tipEl.css("color", "red").text("网络异常，请重试");
+            });
+        }
+
+        // ========== 登录逻辑：精简+优化交互 ==========
+        function login(userType) {
+            let username, password, tipEl;
+            // 根据用户类型获取对应DOM
+            if (userType === 1) {
+                username = TabCache.inputs.login.username.val().trim();
+                password = TabCache.inputs.login.password.val().trim();
+                tipEl = TabCache.tips.login;
+            } else {
+                username = TabCache.inputs.merchantLogin.username.val().trim();
+                password = TabCache.inputs.merchantLogin.password.val().trim();
+                tipEl = TabCache.tips.merchantLogin;
+            }
+
+            // 空值校验
+            if (!username || !password) {
+                tipEl.css("color", "red").text("用户名和密码不能为空");
+                return;
+            }
+
+            // 发起登录请求
+            $.post("/login", {
+                username: username,
+                password: password,
+                userType: userType
+            }, function(res) {
+                if (res.code === 200) {
+                    tipEl.css("color", "green").text(res.msg);
+                    // 保存用户信息到本地存储
+                    localStorage.setItem("userInfo", JSON.stringify(res.data));
+                    // 延迟跳转，提升体验
+                    setTimeout(() => {
+                        window.location.href = userType === 1 ? "user.html" : "merchant.html";
+                    }, 800);
+                } else {
+                    tipEl.css("color", "red").text(res.msg);
+                }
+            }).fail(() => {
+                tipEl.css("color", "red").text("网络异常，请重试");
+            });
+        }
+    </script>
+</body>
+</html>
