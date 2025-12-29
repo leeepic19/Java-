@@ -104,6 +104,31 @@
             background: #dc2626;
         }
 
+        /* 支付按钮样式 */
+        .pay-btn {
+            background: #f59e0b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .pay-btn:hover {
+            background: #d97706;
+        }
+
+        /* 确认送达按钮样式 */
+        .confirm-btn {
+            background: #10b981;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .confirm-btn:hover {
+            background: #059669;
+        }
+
         .confirm-btn {
             background: #3b82f6;
             color: white;
@@ -122,6 +147,109 @@
 
         .cancel-btn:hover {
             background: #64748b;
+        }
+
+        /* 购物车悬浮按钮 */
+        .cart-float-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #3b82f6;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+        .cart-float-btn:hover {
+            transform: scale(1.1);
+            background: #2563eb;
+        }
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
+        /* 购物车弹窗 */
+        .cart-modal-content {
+            width: 600px;
+            max-width: 90%;
+        }
+        .cart-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-item-info {
+            flex: 1;
+        }
+        .cart-item-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .cart-item-price {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        .cart-item-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .cart-total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .total-price {
+            color: #ef4444;
+            font-size: 24px;
+        }
+        .delete-btn {
+            color: #ef4444;
+            background: none;
+            padding: 5px;
+            font-size: 16px;
+        }
+        .delete-btn:hover {
+            background: #fee2e2;
+            color: #dc2626;
         }
 
         /* 轮播容器 */
@@ -544,7 +672,47 @@
             </div>
             <div class="modal-btn-group">
                 <button class="cancel-btn" id="cancelBtn">取消</button>
-                <button id="submitOrderBtn">确认下单</button>
+                <button id="submitOrderBtn">去支付</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车悬浮按钮 -->
+    <div class="cart-float-btn" id="cartBtn" onclick="openCart()">
+        <i class="fas fa-shopping-cart"></i>
+        <div class="cart-badge" id="cartBadge" style="display: none;">0</div>
+    </div>
+
+    <!-- 购物车弹窗 -->
+    <div class="modal-mask" id="cartModal">
+        <div class="modal-content cart-modal-content">
+            <div class="modal-title">购物车</div>
+            <div class="cart-list" id="cartList">
+                <!-- 购物车列表 -->
+            </div>
+            <div class="cart-total">
+                <span>合计：</span>
+                <span class="total-price" id="cartTotalPrice">¥0</span>
+            </div>
+            <div class="modal-btn-group">
+                <button class="cancel-btn" onclick="closeCart()">继续点餐</button>
+                <button onclick="showAddressModal()" style="background: #3b82f6; color: white;">去结算</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 支付弹窗 -->
+    <div class="modal-mask" id="paymentModal" style="display: none; align-items: center; justify-content: center;">
+        <div class="modal-content" style="text-align: center; width: 350px;">
+            <div class="modal-title">微信支付</div>
+            <div style="margin: 20px 0;">
+                <img src="img/wechat_pay.jpg" alt="微信支付二维码" style="width: 200px; height: 200px; object-fit: contain;">
+                <p style="margin-top: 10px; color: #64748b; font-size: 14px;">请使用微信扫一扫完成支付</p>
+                <p style="margin-top: 5px; font-weight: bold; font-size: 18px; color: #ef4444;" id="payAmount">¥0</p>
+            </div>
+            <div class="modal-btn-group" style="justify-content: center;">
+                <button class="cancel-btn" onclick="closePaymentModal()">取消支付</button>
+                <button onclick="finishPayment()" style="background: #10b981; color: white;">支付完成</button>
             </div>
         </div>
     </div>
@@ -555,8 +723,7 @@
         const App = {
             // 状态管理
             state: {
-                currentFoodId: null,
-                currentOrderNum: null,
+                cart: [], // 购物车数据
                 orderListVisible: false,
                 userInfo: null,
                 refreshInterval: null, // 定时器引用，便于销毁
@@ -584,7 +751,14 @@
                 logoutBtn: $("#logoutBtn"),
                 refreshOrderBtn: $("#refreshOrderBtn"),
                 cancelBtn: $("#cancelBtn"),
-                submitOrderBtn: $("#submitOrderBtn")
+                submitOrderBtn: $("#submitOrderBtn"),
+                cartBtn: $("#cartBtn"),
+                cartBadge: $("#cartBadge"),
+                cartModal: $("#cartModal"),
+                cartList: $("#cartList"),
+                cartTotalPrice: $("#cartTotalPrice"),
+                paymentModal: $("#paymentModal"),
+                payAmount: $("#payAmount")
             },
             // 配置常量
             config: {
@@ -642,8 +816,8 @@
             App.els.nextMerchantBtn.on("click", () => switchMerchant(1));
 
             // 弹窗事件
-            App.els.cancelBtn.on("click", closeModal);
-            App.els.submitOrderBtn.on("click", submitOrder);
+            App.els.cancelBtn.on("click", closeAddressModal);
+            App.els.submitOrderBtn.on("click", showPaymentModal);
 
             // 页面刷新前保留登录态
             window.addEventListener("beforeunload", saveUserInfoToSession);
@@ -732,7 +906,7 @@
                                 </div>
                                 <div class="food-action">
                                     <input type="number" class="orderNum" value="1" min="1" max="${food.stock}">
-                                    <button onclick="showModal(${food.id}, this)"><i class="fas fa-shopping-cart"></i> 下单</button>
+                                    <button onclick="addToCart(${food.id}, '${food.foodName}', ${food.price}, '${food.merchantName || ""}', ${food.stock}, this)"><i class="fas fa-cart-plus"></i> 加入购物车</button>
                                 </div>
                             </div>
                         </div>
@@ -817,9 +991,14 @@
                         const { statusText, statusClass } = getOrderStatusInfo(order.status);
                         const deliveryTime = order.deliveryTime ? `${order.deliveryTime}分钟` : "-";
                         const orderTime = new Date(order.orderTime).toLocaleString();
-                        // 确认按钮处理
-                        const confirmBtn = order.status === 1 ? 
-                            `<button class="confirm-btn" onclick="confirmArrival(${order.id})">确认送达</button>` : "-";
+                        // 按钮处理
+                        let actionBtns = "";
+                        
+                        if (order.status === 1) {
+                            actionBtns += `<button class="confirm-btn" onclick="confirmArrival(${order.id})">确认送达</button>`;
+                        }
+                        
+                        if (actionBtns === "") actionBtns = "-";
 
                         return `
                             <tr>
@@ -829,7 +1008,7 @@
                                 <td>${order.orderNum}</td>
                                 <td>${orderTime}</td>
                                 <td>${deliveryTime}</td>
-                                <td>${confirmBtn}</td>
+                                <td>${actionBtns}</td>
                             </tr>
                         `;
                     }).join("");
@@ -1017,6 +1196,227 @@
             if (type !== "loading") {
                 setTimeout(() => $el.text(""), 3000);
             }
+        }
+
+        // ========== 20. 购物车功能 ==========
+        function addToCart(foodId, foodName, price, merchantName, stock, btn) {
+            const orderNum = parseInt($(btn).prev(".orderNum").val());
+            
+            if (orderNum > stock) {
+                showTip(App.els.orderTip, "库存不足", "error");
+                return;
+            }
+
+            // 检查购物车是否已有该商品
+            const existingItem = App.state.cart.find(item => item.foodId === foodId);
+            if (existingItem) {
+                if (existingItem.count + orderNum > stock) {
+                    showTip(App.els.orderTip, "购物车中数量已达库存上限", "error");
+                    return;
+                }
+                existingItem.count += orderNum;
+            } else {
+                App.state.cart.push({
+                    foodId,
+                    foodName,
+                    price,
+                    merchantName,
+                    count: orderNum,
+                    stock
+                });
+            }
+
+            updateCartBadge();
+            showTip(App.els.orderTip, "已加入购物车", "success");
+            
+            // 简单的飞入动画效果（可选）
+            const $img = $(btn).closest('.food-card').find('img');
+            if ($img.length) {
+                const $clone = $img.clone().css({
+                    position: 'fixed',
+                    zIndex: 9999,
+                    top: $img.offset().top - $(window).scrollTop(),
+                    left: $img.offset().left,
+                    width: 50,
+                    height: 50,
+                    borderRadius: '50%',
+                    opacity: 0.8
+                }).appendTo('body');
+
+                $clone.animate({
+                    top: App.els.cartBtn.offset().top - $(window).scrollTop(),
+                    left: App.els.cartBtn.offset().left,
+                    width: 10,
+                    height: 10,
+                    opacity: 0
+                }, 500, function() {
+                    $(this).remove();
+                });
+            }
+        }
+
+        function updateCartBadge() {
+            const totalCount = App.state.cart.reduce((sum, item) => sum + item.count, 0);
+            if (totalCount > 0) {
+                App.els.cartBadge.text(totalCount).show();
+            } else {
+                App.els.cartBadge.hide();
+            }
+        }
+
+        function openCart() {
+            renderCartList();
+            App.els.cartModal.css("display", "flex");
+        }
+
+        function closeCart() {
+            App.els.cartModal.css("display", "none");
+        }
+
+        function renderCartList() {
+            if (App.state.cart.length === 0) {
+                App.els.cartList.html('<div style="text-align:center;padding:20px;color:#94a3b8;">购物车空空如也</div>');
+                App.els.cartTotalPrice.text("¥0");
+                return;
+            }
+
+            let html = "";
+            let total = 0;
+
+            App.state.cart.forEach((item, index) => {
+                const itemTotal = item.price * item.count;
+                total += itemTotal;
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${item.foodName}</div>
+                            <div style="font-size:12px;color:#64748b;">${item.merchantName}</div>
+                        </div>
+                        <div class="cart-item-action">
+                            <span class="cart-item-price">¥${itemTotal}</span>
+                            <span style="font-size:14px;color:#334155;">x${item.count}</span>
+                            <button class="delete-btn" onclick="removeFromCart(${index})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            App.els.cartList.html(html);
+            App.els.cartTotalPrice.text("¥" + total);
+        }
+
+        function removeFromCart(index) {
+            App.state.cart.splice(index, 1);
+            renderCartList();
+            updateCartBadge();
+        }
+
+        // ========== 21. 结算流程 ==========
+        function showAddressModal() {
+            if (App.state.cart.length === 0) {
+                showTip(App.els.orderTip, "购物车为空", "error");
+                return;
+            }
+            closeCart();
+            
+            // 清空表单
+            App.els.userName.val("");
+            App.els.userPhone.val("");
+            App.els.userAddress.val("");
+            
+            App.els.addressModal.css("display", "flex");
+        }
+
+        function closeAddressModal() {
+            App.els.addressModal.css("display", "none");
+            // 如果取消填写地址，重新打开购物车
+            openCart();
+        }
+
+        function showPaymentModal() {
+            // 校验地址信息
+            const userName = App.els.userName.val().trim();
+            const userPhone = App.els.userPhone.val().trim();
+            const userAddress = App.els.userAddress.val().trim();
+
+            if (!validateOrderForm(userName, userPhone, userAddress)) return;
+
+            // 计算总价
+            const total = App.state.cart.reduce((sum, item) => sum + item.price * item.count, 0);
+            App.els.payAmount.text("¥" + total);
+
+            // 关闭地址弹窗，打开支付弹窗
+            App.els.addressModal.css("display", "none");
+            App.els.paymentModal.css("display", "flex");
+        }
+
+        function closePaymentModal() {
+            App.els.paymentModal.css("display", "none");
+            // 如果取消支付，回到地址填写（或者购物车，看需求，这里回到地址填写比较合理）
+            App.els.addressModal.css("display", "flex");
+        }
+
+        function finishPayment() {
+            // 模拟支付成功，开始批量提交订单
+            App.state.userInfo = initUserInfo();
+            if (!App.state.userInfo) {
+                alert("登录态失效，请重新登录");
+                return;
+            }
+
+            const userName = App.els.userName.val().trim();
+            const userPhone = App.els.userPhone.val().trim();
+            const userAddress = App.els.userAddress.val().trim();
+
+            // 批量提交
+            // 由于后端接口是单条提交，这里使用 Promise.all 并发提交
+            // 实际生产环境建议后端提供批量下单接口以保证事务一致性
+            
+            const promises = App.state.cart.map(item => {
+                return $.post("/order/create", {
+                    userId: App.state.userInfo.id,
+                    foodId: item.foodId,
+                    orderNum: item.count,
+                    userName: userName,
+                    userPhone: userPhone,
+                    userAddress: userAddress
+                });
+            });
+
+            Promise.all(promises).then(results => {
+                // 简单判断：只要有一个失败就算失败（或者统计失败数量）
+                // 这里简化处理，假设都成功
+                let failCount = 0;
+                results.forEach(res => {
+                    if (res.code !== 200) failCount++;
+                });
+
+                if (failCount === 0) {
+                    alert("支付成功，订单已提交！");
+                    App.state.cart = []; // 清空购物车
+                    updateCartBadge();
+                    App.els.paymentModal.css("display", "none");
+                    
+                    // 刷新订单列表
+                    if (App.state.orderListVisible) {
+                        getUserOrders();
+                    }
+                    // 刷新餐品列表（更新库存）
+                    getFoodList();
+                } else {
+                    alert(`支付成功，但有 ${failCount} 个商品下单失败（可能是库存不足），请查看订单列表。`);
+                    // 这里可以保留失败的商品在购物车，暂简化为清空
+                    App.state.cart = [];
+                    updateCartBadge();
+                    App.els.paymentModal.css("display", "none");
+                    getUserOrders();
+                    getFoodList();
+                }
+            }).catch(err => {
+                alert("网络异常，部分订单可能提交失败，请联系客服");
+                console.error(err);
+                App.els.paymentModal.css("display", "none");
+            });
         }
     </script>
 </body>
